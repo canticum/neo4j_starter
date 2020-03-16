@@ -16,6 +16,8 @@
 package info.muspoe.test;
 
 import info.muspoe.test.neo4j.SevenBridges;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,24 +30,37 @@ public class Main {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.Exception
      */
     public static void main(String[] args) throws Exception {
 
         var time = (args.length > 0 && args[0].trim().toUpperCase().equals("TODAY"))
                 ? SevenBridges.TODAY : SevenBridges.EULAR;
 
+        System.out.println("***************************");
+        System.out.println(" Königsberg Bridge Problem ");
+        System.out.println("***************************");
+
+        System.out.println("Time = "
+                + (time == SevenBridges.EULAR ? "EULAR" : "TODAY"));
+
         try ( var sb = new SevenBridges()) {
-            System.out.println("Time=" + (time == SevenBridges.EULAR ? "EULAR" : "TODAY"));
+
             sb.reset_graph();
             sb.create_graph(time);
-            var num = sb.countBridges();
-            IntStream.rangeClosed(1, num)
-                    .mapToObj(
-                            n -> String.format("* %d bridges, start from:\n%s", n,
-                                    Stream.of("left", "up", "down", "right")
-                                            .map(p -> String.format("\t%-6s =%4d%n", p.toUpperCase(), sb.path_count(p, n)))
-                                            .collect(Collectors.joining())))
-                    .forEach(System.out::println);
+            var bridge_num = sb.countBridges();
+            System.out.println("Bridge number = " + bridge_num);
+            
+            IntStream.rangeClosed(1, bridge_num).mapToObj(
+                    n -> Map.entry(n,
+                            Stream.of("left", "up", "down", "right")
+                                    .map(p -> Map.entry(p, sb.path_count(p, n)))
+                                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue)))
+            ).forEach(entry -> System.out.printf("* %d bridges, start from:\n%s", entry.getKey(),
+                    entry.getValue().entrySet().stream()
+                            .map(e -> String.format("\t%-6s =%4d%n", e.getKey(), e.getValue()))
+                            .collect(Collectors.joining())
+            ));
         }
     }
 }

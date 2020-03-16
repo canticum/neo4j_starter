@@ -13,23 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test;
-
-import info.muspoe.test.neo4j.COVID_19;
+package info.muspoe.test.neo4j.vo;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class Main_COVID {
+public class Location {
 
-    public static void main(String[] args) {
-        try ( var covid = new COVID_19()) {
-            covid.reset_graph();
-            covid.create_graph(COVID_19.url);
-        } catch (Exception ex) {
-        }
+    protected String province, country;
+    protected double latitude, longitude;
 
+    public String getProvince() {
+        
+        return province;
     }
 
+    public String getCountry() {
+        
+        return country;
+    }
+
+    public double getLatitude() {
+        
+        return latitude;
+    }
+
+    public double getLongitude() {
+     
+        return longitude;
+    }
+
+    public String getName() {
+
+        return (this.province != null ? this.province + ", " : "") + this.country;
+    }
 }
