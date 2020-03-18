@@ -18,6 +18,7 @@ package info.muspoe.test.neo4j;
 import info.muspoe.test.neo4j.vo.RecordDaily;
 import info.muspoe.test.neo4j.vo.RecordTime;
 import info.muspoe.test.neo4j.service.Neo4jService;
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,6 +49,11 @@ public class WuhanVirus extends Neo4jService {
         }
     }
 
+    public void test_file(String url) throws FileNotFoundException, Exception {
+
+        new URL(url).openStream().close();
+    }
+
     public void create_graph(int data_type, String... date) throws Exception {
 
         switch (data_type) {
@@ -59,14 +65,14 @@ public class WuhanVirus extends Neo4jService {
         }
     }
 
-    private void create_graph_daily(String date) throws Exception {
+    private void create_graph_daily(String date)
+            throws FileNotFoundException, Exception {
 
         var url = String.format(url_daily, date);
         System.out.println("Loading data from " + url);
-
         var params = Values.parameters("url", url);
-
-        new URL(url).openStream().close();
+        test_file(url);
+        reset_graph();
 
         List<RecordDaily> values = runCypher(
                 """
@@ -124,7 +130,8 @@ public class WuhanVirus extends Neo4jService {
         });
     }
 
-    private void create_graph_time(int type) {
+    private void create_graph_time(int type)
+            throws FileNotFoundException, Exception {
 
         var url = String.format(url_time, switch (type) {
             case TIME_DEATHS ->
@@ -134,9 +141,10 @@ public class WuhanVirus extends Neo4jService {
             default ->
                 "Confirmed";
         });
+        test_file(url);
+        reset_graph();
 
         var params = Values.parameters("url", url);
-
         List<RecordTime> values = runCypher(
                 """
                 LOAD CSV WITH HEADERS
@@ -183,19 +191,20 @@ public class WuhanVirus extends Neo4jService {
                 .forEach(this::runCypher);
     }
 
-    public void province_death_rate(String country) throws Exception {
+    public void death_rate(String country) throws Exception {
 
         var params = Values.parameters("name", country);
         var query = """
-                    MATCH (n:Country)<--(m)
-                    WHERE n.name=$name RETURN 
+                    MATCH (n:Country)<--(m) 
+                    WHERE n.name=$name 
+                    RETURN 
                     m.name AS name, 
                     m.confirmed AS confirmed, 
                     m.deaths AS deaths, 
                     CASE m.confirmed 
                         WHEN 0 THEN 0.0 
                         ELSE floor(toFloat(m.deaths)/m.confirmed*1000)/10 
-                    END AS rate
+                    END AS rate;
                     """;
         var result = runCypher(query, params, DeathRate::new);
         System.out.printf("%24s%11s%8s  %s\n",
@@ -207,7 +216,7 @@ public class WuhanVirus extends Neo4jService {
                 r.name, r.confirmed, r.deaths, r.death_rate));
     }
 
-    public void country_death_rate() throws Exception {
+    public void death_rate() throws Exception {
 
         var query = """
                     MATCH (n:Country)
@@ -218,7 +227,7 @@ public class WuhanVirus extends Neo4jService {
                     CASE n.confirmed 
                         WHEN 0 THEN 0.0 
                         ELSE floor(toFloat(n.deaths)/n.confirmed*1000)/10 
-                    END AS rate
+                    END AS rate;
                     """;
         var result = runCypher(query, DeathRate::new);
         System.out.printf("%32s%11s%8s  %s\n",

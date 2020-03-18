@@ -17,6 +17,7 @@ package info.muspoe.test.neo4j;
 
 import java.io.FileNotFoundException;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.*;
 
 /**
@@ -55,26 +56,32 @@ public class WuhanVirusTest {
      */
     @Test
     @Disabled
-    public void create_graph_time() throws Exception {
+    public void create_graph_time() {
         System.out.println("create_graph_time");
 
-        instance.reset_graph();
-        instance.create_graph(WuhanVirus.TIME_CONFIRMED);
+        try {
+            instance.create_graph(WuhanVirus.TIME_CONFIRMED);
+        } catch (FileNotFoundException ex) {
+            Logger.getGlobal().severe("ERROR - Specified dataset not exists.");
+        } catch (Exception ex) {
+            Logger.getGlobal().severe("ERROR when fetching specified dataset.");
+        }
     }
 
     /**
      * Test of create_graph method, of class WuhanVirus.
      */
     @Test
-    @Disabled
-    public void create_graph_daily() throws Exception {
+//    @Disabled
+    public void create_graph_daily() {
         System.out.println("create_graph");
 
-        instance.reset_graph();
         try {
-            instance.create_graph(WuhanVirus.DAILY, "03-15-2020");
+            instance.create_graph(WuhanVirus.DAILY, "03-16-2020");
         } catch (FileNotFoundException ex) {
             Logger.getGlobal().severe("ERROR - Specified dataset not exists.");
+        } catch (Exception ex) {
+            Logger.getGlobal().severe("ERROR when fetching specified dataset.");
         }
     }
 
@@ -87,9 +94,10 @@ public class WuhanVirusTest {
     public void testProvince_death_rate() throws Exception {
         System.out.println("province_death_rate");
 
-        String country = "China";
-        instance.province_death_rate(country);
+        String country = "US";
+        instance.death_rate(country);
     }
+
     /**
      * Test of country_death_rate method, of class WuhanVirus. Based on
      * daily-graph pre-imported data.
@@ -99,7 +107,7 @@ public class WuhanVirusTest {
     public void testCountry_death_rate() throws Exception {
         System.out.println("country_death_rate");
 
-        instance.country_death_rate();
+        instance.death_rate();
     }
 
 }
