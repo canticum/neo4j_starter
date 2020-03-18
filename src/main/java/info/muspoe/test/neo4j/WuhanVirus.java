@@ -57,11 +57,16 @@ public class WuhanVirus extends Neo4jService {
     public void create_graph(int data_type, String... date) throws Exception {
 
         switch (data_type) {
-            case TIME_CONFIRMED -> create_graph_time(TIME_CONFIRMED);
-            case TIME_DEATHS -> create_graph_time(TIME_DEATHS);
-            case TIME_RECOVERED -> create_graph_time(TIME_RECOVERED);
-            case DAILY -> create_graph_daily(date[0]);
-            default -> System.out.println("Bad data type, please try again.");
+            case TIME_CONFIRMED ->
+                create_graph_time(TIME_CONFIRMED);
+            case TIME_DEATHS ->
+                create_graph_time(TIME_DEATHS);
+            case TIME_RECOVERED ->
+                create_graph_time(TIME_RECOVERED);
+            case DAILY ->
+                create_graph_daily(date[0]);
+            default ->
+                System.out.println("Bad data type, please try again.");
         }
     }
 
@@ -198,22 +203,19 @@ public class WuhanVirus extends Neo4jService {
                     MATCH (n:Country)<--(m) 
                     WHERE n.name=$name 
                     RETURN 
-                    m.name AS name, 
-                    m.confirmed AS confirmed, 
-                    m.deaths AS deaths, 
+                    m.name AS name, m.confirmed AS confirmed, m.deaths AS deaths, 
                     CASE m.confirmed 
                         WHEN 0 THEN 0.0 
                         ELSE floor(toFloat(m.deaths)/m.confirmed*1000)/10 
                     END AS rate;
                     """;
         var result = runCypher(query, params, DeathRate::new);
-        System.out.printf("%24s%11s%8s  %s\n",
-                "Province", "Confirmed", "Deaths", "Death Rate(%)");
-        System.out.printf("%24s%11s%8s  %s\n",
-                "--------", "---------", "------", "-------------");
+        System.out.printf("    %24s%11s%8s  %s\n", "Province", "Confirmed", "Deaths", "Death Rate(%)");
+        System.out.printf("    %24s%11s%8s  %s\n", "--------", "---------", "------", "-------------");
+        var n = new AtomicInteger(0);
         result.stream().sorted()
-                .forEach(r -> System.out.printf("%24s%11d%8d%10.1f\n",
-                r.name, r.confirmed, r.deaths, r.death_rate));
+                .forEach(r -> System.out.printf("%3d.%24s%11d%8d%10.1f\n",
+                n.incrementAndGet(), r.name, r.confirmed, r.deaths, r.death_rate));
     }
 
     public void death_rate() throws Exception {
@@ -221,22 +223,19 @@ public class WuhanVirus extends Neo4jService {
         var query = """
                     MATCH (n:Country)
                     RETURN 
-                    n.name AS name, 
-                    n.confirmed AS confirmed, 
-                    n.deaths AS deaths, 
+                    n.name AS name, n.confirmed AS confirmed, n.deaths AS deaths, 
                     CASE n.confirmed 
                         WHEN 0 THEN 0.0 
                         ELSE floor(toFloat(n.deaths)/n.confirmed*1000)/10 
                     END AS rate;
                     """;
         var result = runCypher(query, DeathRate::new);
-        System.out.printf("%32s%11s%8s  %s\n",
-                "Country", "Confirmed", "Deaths", "Death Rate(%)");
-        System.out.printf("%32s%11s%8s  %s\n",
-                "--------", "---------", "------", "-------------");
+        System.out.printf("    %32s%11s%8s  %s\n", "Country", "Confirmed", "Deaths", "Death Rate(%)");
+        System.out.printf("    %32s%11s%8s  %s\n", "--------", "---------", "------", "-------------");
+        var n = new AtomicInteger(0);
         result.stream().sorted()
-                .forEach(r -> System.out.printf("%32s%11d%8d%10.1f\n",
-                r.name, r.confirmed, r.deaths, r.death_rate));
+                .forEach(r -> System.out.printf("%3d.%32s%11d%8d%10.1f\n",
+                n.incrementAndGet(), r.name, r.confirmed, r.deaths, r.death_rate));
     }
 }
 

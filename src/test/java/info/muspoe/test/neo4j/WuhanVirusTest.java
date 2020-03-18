@@ -17,7 +17,6 @@ package info.muspoe.test.neo4j;
 
 import java.io.FileNotFoundException;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.*;
 
 /**
@@ -77,7 +76,7 @@ public class WuhanVirusTest {
         System.out.println("create_graph");
 
         try {
-            instance.create_graph(WuhanVirus.DAILY, "03-16-2020");
+            instance.create_graph(WuhanVirus.DAILY, "03-18-2020");
         } catch (FileNotFoundException ex) {
             Logger.getGlobal().severe("ERROR - Specified dataset not exists.");
         } catch (Exception ex) {
@@ -91,8 +90,8 @@ public class WuhanVirusTest {
      */
     @Test
 //    @Disabled
-    public void testProvince_death_rate() throws Exception {
-        System.out.println("province_death_rate");
+    public void testDeath_rate_province() throws Exception {
+        System.out.println("death_rate_province");
 
         String country = "US";
         instance.death_rate(country);
@@ -104,8 +103,8 @@ public class WuhanVirusTest {
      */
     @Test
 //    @Disabled
-    public void testCountry_death_rate() throws Exception {
-        System.out.println("country_death_rate");
+    public void testDeath_rate_country() throws Exception {
+        System.out.println("death_rate_country");
 
         instance.death_rate();
     }
