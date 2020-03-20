@@ -18,11 +18,15 @@ package info.muspoe.test.neo4j;
 import info.muspoe.test.neo4j.vo.RecordDaily;
 import info.muspoe.test.neo4j.vo.RecordTime;
 import info.muspoe.test.neo4j.service.Neo4jService;
+import info.muspoe.test.neo4j.vo.NinjaValue;
 import java.io.FileNotFoundException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Values;
@@ -38,9 +42,14 @@ public class WuhanVirus extends Neo4jService {
     public static final int TIME_DEATHS = 2;
     public static final int TIME_RECOVERED = 3;
 
-    public static String url_base = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/";
-    public static String url_daily = url_base + "csse_covid_19_daily_reports/%s.csv";
-    public static String url_time = url_base + "csse_covid_19_time_series/time_series_19-covid-%s.csv";
+    public static final String URL_BASE
+            = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/";
+    public static final String URL_DAILY
+            = URL_BASE + "csse_covid_19_daily_reports/%s.csv";
+    public static final String URL_TIME
+            = URL_BASE + "csse_covid_19_time_series/time_series_19-covid-%s.csv";
+    public static final String URL_NINJA
+            = "https://corona.lmao.ninja/countries";
 
     public void reset_graph() {
 
@@ -66,14 +75,14 @@ public class WuhanVirus extends Neo4jService {
             case DAILY ->
                 create_graph_daily(date[0]);
             default ->
-                System.out.println("Bad data type, please try again.");
+                System.out.println("Invalid data type, please try again.");
         }
     }
 
     private void create_graph_daily(String date)
             throws FileNotFoundException, Exception {
 
-        var url = String.format(url_daily, date);
+        var url = String.format(URL_DAILY, date);
         System.out.println("Loading data from " + url);
         var params = Values.parameters("url", url);
         test_file(url);
@@ -83,8 +92,7 @@ public class WuhanVirus extends Neo4jService {
                 """
                 LOAD CSV WITH HEADERS
                 FROM $url AS line
-                RETURN line;
-                """, params, RecordDaily::new);
+                RETURN line;""", params, RecordDaily::new);
         System.out.println(values.size() + " records loaded.");
 
         values.stream().forEach(rd -> {
@@ -138,7 +146,7 @@ public class WuhanVirus extends Neo4jService {
     private void create_graph_time(int type)
             throws FileNotFoundException, Exception {
 
-        var url = String.format(url_time, switch (type) {
+        var url = String.format(URL_TIME, switch (type) {
             case TIME_DEATHS ->
                 "Deaths";
             case TIME_RECOVERED ->
@@ -154,8 +162,7 @@ public class WuhanVirus extends Neo4jService {
                 """
                 LOAD CSV WITH HEADERS
                 FROM $url AS line
-                RETURN line;
-                """, params, RecordTime::new);
+                RETURN line;""", params, RecordTime::new);
         System.out.println(values.size() + " records loaded.");
 
         var dates = values.get(0).getData().keySet();
@@ -196,46 +203,78 @@ public class WuhanVirus extends Neo4jService {
                 .forEach(this::runCypher);
     }
 
-    public void death_rate(String country) throws Exception {
+    public void list_by_time(String date) throws Exception {
 
-        var params = Values.parameters("name", country);
-        var query = """
-                    MATCH (n:Country)<--(m) 
-                    WHERE n.name=$name 
-                    RETURN 
-                    m.name AS name, m.confirmed AS confirmed, m.deaths AS deaths, 
-                    CASE m.confirmed 
-                        WHEN 0 THEN 0.0 
-                        ELSE floor(toFloat(m.deaths)/m.confirmed*1000)/10 
-                    END AS rate;
-                    """;
-        var result = runCypher(query, params, DeathRate::new);
-        System.out.printf("    %24s%11s%8s  %s\n", "Province", "Confirmed", "Deaths", "Death Rate(%)");
-        System.out.printf("    %24s%11s%8s  %s\n", "--------", "---------", "------", "-------------");
+        var result = runCypher("""
+                               MATCH (n:Country) 
+                               RETURN n;""",
+                r -> Map.entry(
+                        r.get("n").get("name", ""),
+                        r.get("n").get(date, -1)));
+
+        if (result.get(0).getValue() == -1) {
+            Logger.getGlobal().severe("ERROR - Specified date not exists.");
+        } else {
+            var width = result.stream().mapToInt(r -> r.getKey().length()).max().getAsInt() + 4;
+            System.out.println("Specified Date: " + date);
+            System.out.printf("%" + width + "s%8s\n", "Country", "Number");
+            System.out.printf("%" + width + "s%8s\n", "-------", "------");
+            var n = new AtomicInteger(0);
+            result.stream()
+                    .sorted(Entry.comparingByValue(Comparator.reverseOrder()))
+                    .forEach(e -> System.out.printf("%3d.%" + (width - 4) + "s%8d\n",
+                    n.incrementAndGet(), e.getKey(), e.getValue()));
+        }
+    }
+
+    public void list_confirmed(String country) throws Exception {
+
+        WuhanVirus.this.list_confirmed("MATCH (n)-->(m:Country) WHERE m.name='" + country + "'", "Province");
+    }
+
+    public void list_confirmed() throws Exception {
+
+        WuhanVirus.this.list_confirmed("MATCH (n:Country) ", "Country");
+
+    }
+
+    private void list_confirmed(String query_prefix, String title) {
+
+        var query = query_prefix + """
+                                   RETURN
+                                        n.name AS name, 
+                                        n.confirmed AS confirmed, 
+                                        n.deaths AS deaths, 
+                                   CASE n.confirmed
+                                        WHEN 0 THEN 0.0 
+                                        ELSE floor(toFloat(n.deaths) / n.confirmed * 1000) / 10 
+                                   END AS rate;""";
+        var result = runCypher(query, DeathRate::new);
+        var width = result.stream().mapToInt(r -> r.name.length()).max().getAsInt() + 4;
+        System.out.printf("%" + width + "s%11s%8s  %s\n", "Country", "Confirmed", "Deaths", "Death Rate(%)");
+        System.out.printf("%" + width + "s%11s%8s  %s\n", "-------", "---------", "------", "-------------");
         var n = new AtomicInteger(0);
         result.stream().sorted()
-                .forEach(r -> System.out.printf("%3d.%24s%11d%8d%10.1f\n",
+                .forEach(r -> System.out.printf("%3d.%" + (width - 4) + "s%11d%8d%1d0.1f\n",
                 n.incrementAndGet(), r.name, r.confirmed, r.deaths, r.death_rate));
     }
 
-    public void death_rate() throws Exception {
+    public void list_ninja() {
 
+        var params = Values.parameters("url", URL_NINJA);
         var query = """
-                    MATCH (n:Country)
-                    RETURN 
-                    n.name AS name, n.confirmed AS confirmed, n.deaths AS deaths, 
-                    CASE n.confirmed 
-                        WHEN 0 THEN 0.0 
-                        ELSE floor(toFloat(n.deaths)/n.confirmed*1000)/10 
-                    END AS rate;
-                    """;
-        var result = runCypher(query, DeathRate::new);
-        System.out.printf("    %32s%11s%8s  %s\n", "Country", "Confirmed", "Deaths", "Death Rate(%)");
-        System.out.printf("    %32s%11s%8s  %s\n", "--------", "---------", "------", "-------------");
+                    WITH $url AS url
+                    CALL apoc.load.json(url)
+                    YIELD value RETURN value;""";
+        var result = runCypher(query, params, NinjaValue::new);
+        var width = result.stream().mapToInt(r -> r.getCountry().length()).max().getAsInt() + 4;
+        System.out.printf("%" + width + "s%7s%10s%6s\n", "Country", "Cases", "Cases/Mil", "Death");
+        System.out.printf("%" + width + "s%7s%10s%6s\n", "-------", "-----", "---------", "-----");
         var n = new AtomicInteger(0);
-        result.stream().sorted()
-                .forEach(r -> System.out.printf("%3d.%32s%11d%8d%10.1f\n",
-                n.incrementAndGet(), r.name, r.confirmed, r.deaths, r.death_rate));
+        result.stream()
+                .sorted(Comparator.comparing(NinjaValue::getCasesPerOneMillion, Comparator.reverseOrder()))
+                .forEach(r -> System.out.printf("%3d.%" + (width - 4) + "s%7d%10d%6d\n", n.incrementAndGet(),
+                r.getCountry(), r.getCases(), r.getCasesPerOneMillion(), r.getDeaths()));
     }
 }
 

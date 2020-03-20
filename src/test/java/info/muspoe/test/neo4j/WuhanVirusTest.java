@@ -54,8 +54,8 @@ public class WuhanVirusTest {
      * Test of reset_graph method, of class WuhanVirus.
      */
     @Test
-    @Disabled
-    public void create_graph_time() {
+//    @Disabled
+    public void testCreate_graph_time() {
         System.out.println("create_graph_time");
 
         try {
@@ -71,12 +71,12 @@ public class WuhanVirusTest {
      * Test of create_graph method, of class WuhanVirus.
      */
     @Test
-//    @Disabled
-    public void create_graph_daily() {
+    //@Disabled
+    public void testCreate_graph_daily() {
         System.out.println("create_graph");
 
         try {
-            instance.create_graph(WuhanVirus.DAILY, "03-18-2020");
+            instance.create_graph(WuhanVirus.DAILY, "03-19-2020");
         } catch (FileNotFoundException ex) {
             Logger.getGlobal().severe("ERROR - Specified dataset not exists.");
         } catch (Exception ex) {
@@ -84,29 +84,50 @@ public class WuhanVirusTest {
         }
     }
 
+    @Test
+    public void testList_by_time() throws Exception {
+        System.out.println("list_by_time");
+        
+        var date = "03/19/20";
+        instance.list_by_time(date);
+    }
+
     /**
-     * Test of province_death_rate method, of class WuhanVirus. Based on
-     * daily-graph pre-imported data.
+     * Test of list_ninja method, of class WuhanVirus.
      */
     @Test
-//    @Disabled
-    public void testDeath_rate_province() throws Exception {
-        System.out.println("death_rate_province");
+    public void testList_ninja() {
+        System.out.println("list_ninja");
+
+        instance.list_ninja();
+    }
+
+    /**
+     * Test of province_death_rate method, of class WuhanVirus.Based on
+     * daily-graph pre-imported data.
+     *
+     * @throws java.lang.Exception
+     */
+    @Test
+    //@Disabled
+    public void testList_confirmed_String() throws Exception {
+        System.out.println("list_confirmed");
 
         String country = "US";
-        instance.death_rate(country);
+        instance.list_confirmed(country);
     }
 
     /**
-     * Test of country_death_rate method, of class WuhanVirus. Based on
+     * Test of country_death_rate method, of class WuhanVirus.Based on
      * daily-graph pre-imported data.
+     *
+     * @throws java.lang.Exception
      */
     @Test
-//    @Disabled
-    public void testDeath_rate_country() throws Exception {
-        System.out.println("death_rate_country");
+    //@Disabled
+    public void testList_confirmed_0args() throws Exception {
+        System.out.println("list_confirmed");
 
-        instance.death_rate();
+        instance.list_confirmed();
     }
-
 }
