@@ -57,23 +57,16 @@ public class Neo4jService implements AutoCloseable {
             Value parameters,
             Function<Record, T> mapFunction) {
 
-        try ( var session = driver.session()) {
+        try (var session = driver.session()) {
             return session.run(query, parameters).list(mapFunction);
         }
-    }
-
-    public <T> List<T> runCypher(
-            String query,
-            Function<Record, T> mapFunction) {
-
-        return runCypher(query, null, mapFunction);
     }
 
     public Record runCypherSingle(
             String query,
             Value parameters) {
 
-        try ( var session = driver.session()) {
+        try (var session = driver.session()) {
             return session.run(query, parameters).single();
         }
     }
@@ -81,6 +74,11 @@ public class Neo4jService implements AutoCloseable {
     public void runCypher(String query) {
 
         runCypher(query, null);
+    }
+
+    private void runCypher(String query, Value params) {
+
+        runCypher(query, params);
     }
 
     @Override
