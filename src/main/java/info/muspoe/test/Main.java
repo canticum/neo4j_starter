@@ -28,6 +28,8 @@ import java.util.stream.Stream;
  */
 public class Main {
 
+    private static final int PORT = 11006;
+
     /**
      * @param args the command line arguments
      * @throws java.lang.Exception
@@ -36,6 +38,8 @@ public class Main {
 
         var time = (args.length > 0 && args[0].trim().toUpperCase().equals("TODAY"))
                 ? SevenBridges.TODAY : SevenBridges.EULAR;
+        var port = (args.length > 1)
+                ? Integer.parseInt(args[1].trim()) : PORT;
 
         System.out.println("***************************");
         System.out.println(" Königsberg Bridge Problem ");
@@ -44,13 +48,13 @@ public class Main {
         System.out.println("Time = "
                 + (time == SevenBridges.EULAR ? "EULAR" : "TODAY"));
 
-        try ( var sb = new SevenBridges()) {
+        try (var sb = new SevenBridges(port, "neo4j", "123456")) {
 
             sb.reset_graph();
             sb.create_graph(time);
             var bridge_num = sb.countBridges();
             System.out.println("Bridge number = " + bridge_num);
-            
+
             IntStream.rangeClosed(1, bridge_num).mapToObj(
                     n -> Map.entry(n,
                             Stream.of("left", "up", "down", "right")

@@ -16,6 +16,8 @@
 package info.muspoe.test.neo4j.service;
 
 import info.muspoe.test.neo4j.SevenBridges;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
@@ -33,21 +35,38 @@ import org.neo4j.driver.Value;
 public class Neo4jService implements AutoCloseable {
 
     protected Driver driver;
+    private static String uri, user, password;
 
-    public Neo4jService() {
-
+    static {
         try {
             Properties pros = new Properties();
             pros.load(SevenBridges.class.getResourceAsStream("/neo4j.properties"));
             var uri = pros.getProperty("uri");
             var user = pros.getProperty("user");
             var password = pros.getProperty("password");
+        } catch (IOException ex) {
+            System.out.println("******************************");
+            System.out.println(" Neo4j initialization failed. ");
+            System.out.println("******************************");
+            System.exit(0);
+        }
+    }
+
+    public Neo4jService() {
+
+        this(uri, user, password);
+    }
+
+    public Neo4jService(String uri, String user, String password) {
+
+        try {
             driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
             driver.verifyConnectivity();
         } catch (Exception ex) {
             System.out.println("******************************");
             System.out.println(" Neo4j initialization failed. ");
             System.out.println("******************************");
+            System.out.println(ex.getMessage());
             driver.close();
             System.exit(0);
         }
@@ -60,6 +79,11 @@ public class Neo4jService implements AutoCloseable {
             queries.forEach(tx::run);
             tx.commit();
         }
+    }
+
+    public void runTransaction(Query... queries) {
+
+        runTransaction(Arrays.asList(queries));
     }
 
     public <T> List<T> runCypher(
@@ -79,16 +103,6 @@ public class Neo4jService implements AutoCloseable {
         try (var session = driver.session()) {
             return session.run(query, parameters).single();
         }
-    }
-
-    public void runCypher(String query) {
-
-        runCypher(query, null);
-    }
-
-    private void runCypher(String query, Value params) {
-
-        runCypher(query, params, null);
     }
 
     @Override

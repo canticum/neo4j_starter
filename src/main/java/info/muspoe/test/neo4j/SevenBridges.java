@@ -16,6 +16,9 @@
 package info.muspoe.test.neo4j;
 
 import info.muspoe.test.neo4j.service.Neo4jService;
+import java.util.ArrayList;
+import java.util.List;
+import org.neo4j.driver.Query;
 import org.neo4j.driver.Values;
 
 /**
@@ -27,33 +30,45 @@ public class SevenBridges extends Neo4jService {
     public static final int EULAR = 0;
     public static final int TODAY = 1;
 
+    public SevenBridges(int port, String user, String password) {
+
+        super("bolt://localhost:" + port, user, password);
+    }
+
     public void reset_graph() {
 
-        try ( var session = driver.session()) {
-            session.run("MATCH(n:Place) DETACH DELETE n;");
-        }
+        runTransaction(new Query("MATCH(n:Place) DETACH DELETE n;"));
+
     }
 
     public void create_graph(int n) {
 
-        var create = """
-                     CREATE
-                        (left:Place{name:"left"}),
-                        (right:Place{name:"right"}),
-                        (up:Place{name:"up"}),
-                        (down:Place{name:"down"}),
-                        (left)-[:Bridge]->(up),
-                        (left)-[:Bridge]->(down),
-                        (left)-[:Bridge]->(right),
-                        (right)-[:Bridge]->(up),
-                        (right)-[:Bridge]->(down)%s;""";
-        var query = String.format(create,
-                (n == TODAY ? ""
-                        : """
-                          ,
-                          (left)<-[:Bridge]-(up),
-                          (left)<-[:Bridge]-(down)"""));
-        runCypher(query);
+        List<Query> queries = new ArrayList<>();
+
+        queries.add(new Query(
+                """
+                CREATE (left:Place{name:"left"}),
+                       (right:Place{name:"right"}),
+                       (up:Place{name:"up"}),
+                       (down:Place{name:"down"}),
+                       (left)-[:Bridge]->(up),
+                       (left)<-[:Bridge]-(up),
+                       (left)-[:Bridge]->(down),
+                       (left)<-[:Bridge]-(down),
+                       (left)-[:Bridge]->(right),
+                       (right)-[:Bridge]->(up),
+                       (right)-[:Bridge]->(down);"""));
+
+        var query_today = new Query(
+                """
+                MATCH (:Place{name:"left"})<-[r]-()
+                DELETE r;""");
+
+        if (n == TODAY) {
+            queries.add(query_today);
+        }
+
+        runTransaction(queries);
     }
 
     public int path_count(String place, Integer num) {
