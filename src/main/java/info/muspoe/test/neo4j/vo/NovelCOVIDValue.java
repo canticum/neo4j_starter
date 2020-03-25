@@ -21,12 +21,12 @@ import org.neo4j.driver.Record;
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class NinjaValue {
+public class NovelCOVIDValue {
 
     String country;
     int recovered, cases, critical, active, casesPerOneMillion, deaths, todayCases, todayDeaths;
 
-    public NinjaValue(Record record) {
+    public NovelCOVIDValue(Record record) {
         var r = record.get("value");
         this.country = r.get("country", "");
         this.recovered = r.get("recovered", 0);

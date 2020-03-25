@@ -13,28 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
-
-import info.muspoe.test.neo4j.service.Neo4jService;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package info.muspoe.test.neo4j.ex;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class WuhanVirus extends Neo4jService {
+public class SpecifiedCountryNotExistsException extends RuntimeException {
 
-    public static boolean test(String url) throws Exception {
+    /**
+     * Creates a new instance of <code>SpecifiedCountryNotExistsException</code>
+     * without detail message.
+     */
+    public SpecifiedCountryNotExistsException() {
+    }
 
-        Logger.getGlobal().log(Level.INFO, "Testing data from {0}", url);
-        try {
-            new URL(url).openStream().close();
-        } catch (FileNotFoundException ex) {
-            return false;
-        }
-        return true;
+    /**
+     * Constructs an instance of <code>SpecifiedCountryNotExistsException</code>
+     * with the specified detail message.
+     *
+     * @param msg the detail message.
+     */
+    public SpecifiedCountryNotExistsException(String msg) {
+        super(msg);
     }
 }

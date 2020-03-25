@@ -15,37 +15,42 @@
  */
 package info.muspoe.test.neo4j.wuhan;
 
-import info.muspoe.test.neo4j.ex.SpecifiedDateNotExistsException;
-import info.muspoe.test.neo4j.vo.NinjaValue;
+import info.muspoe.test.neo4j.vo.NovelCOVIDValue;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import org.neo4j.driver.Values;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class NinjaDatasetReader extends WuhanVirus {
+public class NovelCOVIDReader extends WuhanVirus {
 
     public static final String URL_NINJA
             = "https://corona.lmao.ninja/countries";
 
-    public void list_ninja() {
+    public void list(Function<NovelCOVIDValue, Integer> keyExtractor) {
 
         var params = Values.parameters("url", URL_NINJA);
         var query = """
                     WITH $url AS url
                     CALL apoc.load.json(url)
                     YIELD value RETURN value;""";
-        var result = runCypher(query, params, NinjaValue::new);
+        var result = runCypher(query, params, NovelCOVIDValue::new);
         var width = result.stream().mapToInt(r -> r.getCountry().length()).max().getAsInt() + 4;
-        System.out.printf("%" + width + "s%7s%10s%6s\n", "Country", "Cases", "Cases/Mil", "Death");
-        System.out.printf("%" + width + "s%7s%10s%6s\n", "-------", "-----", "---------", "-----");
+        System.out.printf("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
+                "Country", "Cases", "Cases/Mil", "Death", "Recovered", "TodayCases", "TodayDeaths");
+        System.out.printf("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
+                "-------", "-----", "---------", "-----", "---------", "----------", "-----------");
         var n = new AtomicInteger(0);
         result.stream()
-                .sorted(Comparator.comparing(NinjaValue::getCasesPerOneMillion, Comparator.reverseOrder()))
-                .forEach(r -> System.out.printf("%3d.%" + (width - 4) + "s%7d%10d%6d\n", n.incrementAndGet(),
-                r.getCountry(), r.getCases(), r.getCasesPerOneMillion(), r.getDeaths()));
+                .sorted(Comparator.comparing(keyExtractor, Comparator.reverseOrder()))
+                .forEach(r -> System.out.printf(
+                "%3d.%" + (width - 4) + "s %7d %9d %5d %9d %10d %11d\n",
+                n.incrementAndGet(), r.getCountry(),
+                r.getCases(), r.getCasesPerOneMillion(), r.getDeaths(),
+                r.getRecovered(), r.getTodayCases(), r.getTodayDeaths()
+        ));
     }
 }

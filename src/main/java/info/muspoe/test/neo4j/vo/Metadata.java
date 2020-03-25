@@ -15,11 +15,14 @@
  */
 package info.muspoe.test.neo4j.vo;
 
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandDataReader.DAILY_REPORT_FORMATTER;
+import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
+import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.TIME_SERIES_FORMATTER;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.neo4j.driver.Record;
+import org.neo4j.driver.Value;
 
 /**
  *
@@ -27,55 +30,63 @@ import org.neo4j.driver.Record;
  */
 public class Metadata {
 
-    String daily_report_uri, timeseries_confirmed_uri, timeseries_deaths_uri;
-    LocalDate updated_date;
+    String dailyReport_uri, timeSeries_confirmed_uri, timeSeries_deaths_uri;
+    LocalDate dailyReport_updated_date;
+    List<String> timeSeries_dates;
 
     public Metadata(Record record) {
         Logger.getGlobal().info("Metadata");
 
         var r = record.get("n");
-        this.daily_report_uri = r.get("daily_report_uri", "");
-        this.timeseries_confirmed_uri = r.get("timeseries_confirmed_uri", "");
-        this.timeseries_deaths_uri = r.get("timeseries_deaths_uri", "");
-        var updated = r.get("updated_date", "");
-        if (!updated.isEmpty()) {
-            this.updated_date = LocalDate.parse(updated, DAILY_REPORT_FORMATTER);
+        this.dailyReport_uri = r.get("dailyReport_uri", "");
+        this.timeSeries_confirmed_uri = r.get("timeSeries_confirmed_uri", "");
+        this.timeSeries_deaths_uri = r.get("timeSeries_deaths_uri", "");
+        this.timeSeries_dates = r.get("timeSeries_dates", List.of(), Value::asString);
+        var dru_date = r.get("dailyReport_updated_date", "");
+        if (!dru_date.isEmpty()) {
+            this.dailyReport_updated_date = LocalDate.parse(dru_date, DAILY_REPORT_FORMATTER);
         }
     }
 
     public Map<String, String> getTimeseries_uris() {
         return Map.of(
-                "confirmed", this.timeseries_confirmed_uri,
-                "deaths", this.timeseries_deaths_uri
+                "confirmed", this.timeSeries_confirmed_uri,
+                "deaths", this.timeSeries_deaths_uri
         );
     }
 
     public String getDaily_report_uri() {
-        return daily_report_uri;
+        return dailyReport_uri;
     }
 
-    public String getTimeseries_confirmed_uri() {
-        return timeseries_confirmed_uri;
+    public String getTimeSeries_confirmed_uri() {
+        return timeSeries_confirmed_uri;
     }
 
-    public String getTimeseries_deaths_uri() {
-        return timeseries_deaths_uri;
+    public String getTimeSeries_deaths_uri() {
+        return timeSeries_deaths_uri;
     }
 
-    public LocalDate getUpdated_date() {
-        return updated_date;
+    public List<String> getTimeSeries_dates() {
+        return timeSeries_dates;
     }
 
-    public void setUpdated_date(LocalDate updated_date) {
-        this.updated_date = updated_date;
+    public LocalDate getDailyReport_updated_date() {
+        return dailyReport_updated_date;
+    }
+
+    public void setDailyReport_updated_date(LocalDate dailyReport_updated_date) {
+        this.dailyReport_updated_date = dailyReport_updated_date;
     }
 
     @Override
     public String toString() {
-        return "Metadata{" + "daily_report_uri=" + daily_report_uri
-                + ", timeseries_confirmed_uri=" + timeseries_confirmed_uri
-                + ", timeseries_deaths_uri=" + timeseries_deaths_uri
-                + ", updated_date=" + updated_date + '}';
+        return "Metadata{" + "dailyReport_uri=" + dailyReport_uri
+                + ", timeSeries_confirmed_uri=" + timeSeries_confirmed_uri
+                + ", timeSeries_deaths_uri=" + timeSeries_deaths_uri
+                + ", dailyReport_updated_date=" + dailyReport_updated_date
+                + ", timeSeries_dates=" + timeSeries_dates
+                + '}';
     }
 
 }

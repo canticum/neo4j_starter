@@ -22,6 +22,7 @@ import java.util.function.Function;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.Query;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;
 
@@ -52,6 +53,15 @@ public class Neo4jService implements AutoCloseable {
         }
     }
 
+    public void runTransaction(List<Query> queries) {
+
+        try (var session = driver.session();
+             var tx = session.beginTransaction()) {
+            queries.forEach(tx::run);
+            tx.commit();
+        }
+    }
+
     public <T> List<T> runCypher(
             String query,
             Value parameters,
@@ -78,7 +88,7 @@ public class Neo4jService implements AutoCloseable {
 
     private void runCypher(String query, Value params) {
 
-        runCypher(query, params);
+        runCypher(query, params, null);
     }
 
     @Override

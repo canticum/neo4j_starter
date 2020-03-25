@@ -15,27 +15,27 @@
  */
 package info.muspoe.test.neo4j.wuhan;
 
+import info.muspoe.test.neo4j.vo.NovelCOVIDValue;
 import org.junit.jupiter.api.*;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class NinjaDatasetReaderTest {
+public class NovelCOVIDReaderTest {
 
-    static NinjaDatasetReader instance;
+    static NovelCOVIDReader instance;
 
-    public NinjaDatasetReaderTest() {
+    public NovelCOVIDReaderTest() {
     }
 
     @BeforeAll
     public static void setUpClass() {
 
-        System.out.println("***************");
-        System.out.println("  Wuhan Virus  ");
-        System.out.println(" Ninja DataSet ");
-        System.out.println("***************");
-        instance = new NinjaDatasetReader();
+        System.out.println("***************************");
+        System.out.println(" Wuhan Virus Ninja DataSet ");
+        System.out.println("***************************");
+        instance = new NovelCOVIDReader();
     }
 
     @AfterAll
@@ -53,12 +53,16 @@ public class NinjaDatasetReaderTest {
     }
 
     /**
-     * Test of list_ninja method, of class NinjaDatasetReader.
+     * Test of list method, of class NovelCOVIDReader.
      */
-    @org.junit.jupiter.api.Test
+    @Test
     public void testList_ninja() {
-        System.out.println("list_ninja");
+        System.out.println("list");
 
-        instance.list_ninja();
+        instance.list(NovelCOVIDValue::getTodayCases);
+//        instance.list(NovelCOVIDValue::getCasesPerOneMillion);
+//        instance.list(NovelCOVIDValue::getCases);
+//        instance.list((t) -> t.getCasesPerOneMillion()*(t.getDeaths())/(t.getRecovered()+1));
+//        instance.list((t) -> t.getDeaths() / t.getCases() * 100);
     }
 }

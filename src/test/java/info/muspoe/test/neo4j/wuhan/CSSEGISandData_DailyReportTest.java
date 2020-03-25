@@ -15,28 +15,27 @@
  */
 package info.muspoe.test.neo4j.wuhan;
 
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandDataReader.DAILY_REPORT_FORMATTER;
+import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
 import org.junit.jupiter.api.*;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class CSSEGISandDataReaderTest {
+public class CSSEGISandData_DailyReportTest {
 
-    static CSSEGISandDataReader instance;
+    static CSSEGISandData_DailyReport instance;
 
-    public CSSEGISandDataReaderTest() {
+    public CSSEGISandData_DailyReportTest() {
     }
 
     @BeforeAll
     public static void setUpClass() throws Exception {
 
-        System.out.println("*******************");
-        System.out.println("    Wuhan Virus    ");
-        System.out.println(" CSSEGISandDataSet ");
-        System.out.println("*******************");
-        instance = new CSSEGISandDataReader();
+        System.out.println("************************************************");
+        System.out.println(" Wuhan Virus CSSEGISandData DailyReport Dataset ");
+        System.out.println("************************************************");
+        instance = new CSSEGISandData_DailyReport();
     }
 
     @AfterAll
@@ -54,7 +53,8 @@ public class CSSEGISandDataReaderTest {
     }
 
     /**
-     * Test of update_daily_report_data method, of class CSSEGISandDataReader.
+     * Test of update_daily_report_data method, of class
+     * CSSEGISandData_TimeSeries.
      *
      * @throws java.lang.Exception
      */
@@ -63,11 +63,15 @@ public class CSSEGISandDataReaderTest {
     public void testUpdate_daily_report_data() throws Exception {
         System.out.println("update_daily_report_data");
 
-        instance.update_daily_report_data(instance.date.format(DAILY_REPORT_FORMATTER));
+        var needUpdated = instance.updateRequired();
+        System.out.println("needUpdated = " + needUpdated);
+//        instance.update_data();
+
+//        instance.update_daily_report_data(instance.dailyReport_updated_date.format(DAILY_REPORT_FORMATTER));
     }
 
     /**
-     * Test of list_confirmed method, of class CSSEGISandDataReader.
+     * Test of list_confirmed method, of class CSSEGISandData_TimeSeries.
      *
      * @throws java.lang.Exception
      */
@@ -77,11 +81,11 @@ public class CSSEGISandDataReaderTest {
         System.out.println("list_confirmed");
 
         String country = "US";
-        instance.list_confirmed(country);
+//        instance.list_confirmed(country);
     }
 
     /**
-     * Test of list_confirmed method, of class CSSEGISandDataReader.
+     * Test of list_confirmed method, of class CSSEGISandData_TimeSeries.
      *
      * @throws java.lang.Exception
      */
@@ -90,21 +94,6 @@ public class CSSEGISandDataReaderTest {
     public void testList_confirmed_0args() throws Exception {
         System.out.println("list_confirmed");
 
-        instance.list_confirmed();
+//        instance.list_confirmed();
     }
-
-    /**
-     * Test of list_by_time method, of class CSSEGISandDataReader.
-     *
-     * @throws java.lang.Exception
-     */
-    @Test
-    public void testList_by_time() throws Exception {
-        System.out.println("list_by_time");
-
-        var date = "3/22/20";
-        System.out.println("Date = " + date);
-        instance.list_by_time(date);
-    }
-
 }

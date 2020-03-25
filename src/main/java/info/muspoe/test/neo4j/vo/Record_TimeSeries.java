@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.neo4j.driver.Record;
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandDataReader.TIME_SERIES_FORMATTER;
+import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.TIME_SERIES_FORMATTER;
 
 /**
  *
@@ -44,7 +44,7 @@ public class Record_TimeSeries extends Location {
                 timeSeriesData.put(date, num);
             }
         });
-        System.out.println("record created: " + this.getName());
+//        System.out.println("record created: " + this.getName());
     }
 
     public Map<LocalDate, Integer> getTimeSeriesData() {
