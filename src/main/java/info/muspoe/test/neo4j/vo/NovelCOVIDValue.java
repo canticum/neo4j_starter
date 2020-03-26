@@ -24,19 +24,32 @@ import org.neo4j.driver.Record;
 public class NovelCOVIDValue {
 
     String country;
-    int recovered, cases, critical, active, casesPerOneMillion, deaths, todayCases, todayDeaths;
+    int recovered, cases, critical, active,
+            deaths, todayCases, todayDeaths;
+    double casesPerOneMillion, deathsPerOneMillion;
 
     public NovelCOVIDValue(Record record) {
         var r = record.get("value");
-        this.country = r.get("country", "");
-        this.recovered = r.get("recovered", 0);
-        this.cases = r.get("cases", 0);
-        this.critical = r.get("critical", 0);
-        this.active = r.get("active", 0);
-        this.casesPerOneMillion = r.get("casesPerOneMillion", 0);
-        this.deaths = r.get("deaths", 0);
-        this.todayCases = r.get("todayCases", 0);
-        this.todayDeaths = r.get("todayDeaths", 0);
+        this.country = r.get("country").asString();
+        System.out.print(country + " 1");
+        this.cases = r.get("cases").asInt();
+        System.out.print("2");
+        this.todayCases = r.get("todayCases").asInt();
+        System.out.print("3");
+        this.deaths = r.get("deaths").asInt();
+        System.out.print("4");
+        this.todayDeaths = r.get("todayDeaths").asInt();
+        System.out.print("5");
+        this.recovered = r.get("recovered").asInt();
+        System.out.print("6");
+        this.active = r.get("active").asInt();
+        System.out.print("7");
+        this.critical = r.get("critical").asInt();
+        System.out.print("8");
+        this.casesPerOneMillion = r.get("casesPerOneMillion", 0.0);
+        System.out.print("9");
+        this.deathsPerOneMillion = r.get("deathsPerOneMillion", 0.0);
+        System.out.println("0");
     }
 
     public String getCountry() {
@@ -59,7 +72,7 @@ public class NovelCOVIDValue {
         return active;
     }
 
-    public int getCasesPerOneMillion() {
+    public double getCasesPerOneMillion() {
         return casesPerOneMillion;
     }
 

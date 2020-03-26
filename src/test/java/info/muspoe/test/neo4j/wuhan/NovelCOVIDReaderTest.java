@@ -32,9 +32,9 @@ public class NovelCOVIDReaderTest {
     @BeforeAll
     public static void setUpClass() {
 
-        System.out.println("***************************");
-        System.out.println(" Wuhan Virus Ninja DataSet ");
-        System.out.println("***************************");
+        System.out.println("********************************");
+        System.out.println(" Wuhan Virus NovelCOVID DataSet ");
+        System.out.println("********************************");
         instance = new NovelCOVIDReader();
     }
 
@@ -56,11 +56,11 @@ public class NovelCOVIDReaderTest {
      * Test of list method, of class NovelCOVIDReader.
      */
     @Test
-    public void testList_ninja() {
+    public void testList() {
         System.out.println("list");
 
-        instance.list(NovelCOVIDValue::getTodayCases);
-//        instance.list(NovelCOVIDValue::getCasesPerOneMillion);
+//        instance.list(NovelCOVIDValue::getTodayCases);
+        instance.list(NovelCOVIDValue::getCasesPerOneMillion);
 //        instance.list(NovelCOVIDValue::getCases);
 //        instance.list((t) -> t.getCasesPerOneMillion()*(t.getDeaths())/(t.getRecovered()+1));
 //        instance.list((t) -> t.getDeaths() / t.getCases() * 100);

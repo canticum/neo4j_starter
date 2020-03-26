@@ -17,7 +17,6 @@ package info.muspoe.test.neo4j.service;
 
 import info.muspoe.test.neo4j.SevenBridges;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
@@ -27,6 +26,7 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;
+import org.neo4j.driver.Values;
 
 /**
  *
@@ -35,15 +35,16 @@ import org.neo4j.driver.Value;
 public class Neo4jService implements AutoCloseable {
 
     protected Driver driver;
-    private static String uri, user, password;
 
-    static {
+    public Neo4jService() {
+
         try {
             Properties pros = new Properties();
             pros.load(SevenBridges.class.getResourceAsStream("/neo4j.properties"));
             var uri = pros.getProperty("uri");
             var user = pros.getProperty("user");
             var password = pros.getProperty("password");
+            connect(uri, user, password);
         } catch (IOException ex) {
             System.out.println("******************************");
             System.out.println(" Neo4j initialization failed. ");
@@ -52,12 +53,12 @@ public class Neo4jService implements AutoCloseable {
         }
     }
 
-    public Neo4jService() {
+    public Neo4jService(String uri, String user, String password) {
 
-        this(uri, user, password);
+        connect(uri, user, password);
     }
 
-    public Neo4jService(String uri, String user, String password) {
+    private void connect(String uri, String user, String password) {
 
         try {
             driver = GraphDatabase.driver(uri, AuthTokens.basic(user, password));
@@ -72,21 +73,26 @@ public class Neo4jService implements AutoCloseable {
         }
     }
 
-    public void runTransaction(List<Query> queries) {
+    public synchronized void runTx(List<Query> queries) {
 
         try (var session = driver.session();
              var tx = session.beginTransaction()) {
             queries.forEach(tx::run);
+//            queries.stream().map(tx::run).map(Result::list).forEach(consumer::accept);
             tx.commit();
         }
     }
 
-    public void runTransaction(Query... queries) {
+    public synchronized void run(Query query) {
 
-        runTransaction(Arrays.asList(queries));
+        try (var session = driver.session();
+             var tx = session.beginTransaction()) {
+            tx.run(query);
+            tx.commit();
+        }
     }
 
-    public <T> List<T> runCypher(
+    public synchronized <T> List<T> run(
             String query,
             Value parameters,
             Function<Record, T> mapFunction) {
@@ -96,13 +102,26 @@ public class Neo4jService implements AutoCloseable {
         }
     }
 
-    public Record runCypherSingle(
+    public synchronized Record runSingle(
             String query,
             Value parameters) {
 
         try (var session = driver.session()) {
             return session.run(query, parameters).single();
         }
+    }
+
+    public synchronized void removeNodes(List<String> labels) {
+
+        var params = Values.parameters("labels", labels);
+        var query = new Query(
+                """
+                MATCH(n)
+                UNWIND labels(n) AS label
+                WITH label, n
+                WHERE label IN $labels                
+                DETACH DELETE n;""", params);
+        Neo4jService.this.run(query);
     }
 
     @Override

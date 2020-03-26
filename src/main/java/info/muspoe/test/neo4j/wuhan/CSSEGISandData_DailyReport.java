@@ -51,8 +51,8 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
         Logger.getGlobal().info("updateRequired");
 
         try {
-            metadata = new Metadata(runCypherSingle("MATCH (n:Metadata) RETURN n;", null));
-            var country_number = runCypherSingle("MATCH (n:Country) RETURN count(n) AS num;", null)
+            metadata = new Metadata(runSingle("MATCH (n:Metadata) RETURN n;", null));
+            var country_number = runSingle("MATCH (n:Country) RETURN count(n) AS num;", null)
                     .get("num").asInt();
             return (this.dailyReport_updated_date.isAfter(metadata.getDailyReport_updated_date()) || country_number < 100);
         } catch (Exception ex) {
@@ -61,12 +61,17 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
 
     }
 
-    public void update_data() throws Exception {
+    @Override
+    public void update_data() {
         Logger.getGlobal().info("update_data");
 
-        reset_graph();
-        update_metadata();
-        update_daily_report_data(dailyReport_updated_date.format(DAILY_REPORT_FORMATTER));
+        try {
+            reset_graph();
+            update_metadata();
+            update_daily_report_data(dailyReport_updated_date.format(DAILY_REPORT_FORMATTER));
+        } catch (Exception ex) {
+            Logger.getLogger(CSSEGISandData_DailyReport.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void update_metadata() {
@@ -77,7 +82,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
                 "daily_report_uri", URL.apply(daily_report_updated_date),
                 "daily_report_updated_date", daily_report_updated_date
         );
-        metadata = runCypher("""
+        metadata = run("""
                   MERGE (n:Metadata) 
                   SET n.daily_report_uri=$daily_report_uri,
                       n.daily_report_updated_date=$daily_report_updated_date
@@ -92,7 +97,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
 
         Logger.getGlobal().log(Level.INFO, "Loading data from {0}", url);
         var params = Values.parameters("url", url);
-        List<Record_DailyReport> values = runCypher("""
+        List<Record_DailyReport> values = run("""
                 LOAD CSV WITH HEADERS
                 FROM $url AS line
                 RETURN line;""", params, Record_DailyReport::new);
@@ -107,7 +112,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
                     "recovered", record.getRecovered());
             if (record.getProvince() == null) {
                 // Country
-                runCypherSingle(
+                runSingle(
                         """
                         MERGE (n:Country{name:$cname})
                         SET n.dailyreport_confirmed=$confirmed, 
@@ -126,7 +131,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
                             m.dailyreport_recovered=$recovered,
                             m.dailyreport_deaths=$deaths
                         RETURN n;""";
-                var c = runCypherSingle(cypher, params).get("n");
+                var c = runSingle(cypher, params).get("n");
                 Logger.getGlobal().log(Level.INFO,
                         "Province {0} created, with confirmed={1}, deaths={2}, recovered={3}.",
                         new Object[]{record.getProvince(), record.getConfirmed(), record.getDeaths(), record.getRecovered()});
@@ -138,7 +143,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
                         "confirmed", confirmed,
                         "deaths", deaths,
                         "recovered", recovered);
-                runCypherSingle(
+                runSingle(
                         """
                         MATCH (n:Country{name:$name})
                         SET n.dailyreport_confirmed=$confirmed, 
@@ -179,7 +184,7 @@ public class CSSEGISandData_DailyReport extends CSSEGISandData {
                                         n.confirmed AS confirmed, 
                                         n.deaths AS deaths;""";
         System.out.println(query);
-        List<DeathRate> result = runCypher(query, null, DeathRate::new);
+        List<DeathRate> result = run(query, null, DeathRate::new);
         var nw = result.stream().mapToInt(r -> r.getName().length()).max().getAsInt() + 4;
         var tw = title.length();
         System.out.printf("%" + nw + "s%11s%8s  %s\n", title,

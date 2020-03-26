@@ -27,7 +27,7 @@ import org.neo4j.driver.Values;
  */
 public class SevenBridges extends Neo4jService {
 
-    public static final int EULAR = 0;
+    public static final int EULER = 0;
     public static final int TODAY = 1;
 
     public SevenBridges(int port, String user, String password) {
@@ -37,8 +37,7 @@ public class SevenBridges extends Neo4jService {
 
     public void reset_graph() {
 
-        runTransaction(new Query("MATCH(n:Place) DETACH DELETE n;"));
-
+        removeNodes(List.of("Place"));
     }
 
     public void create_graph(int n) {
@@ -68,26 +67,28 @@ public class SevenBridges extends Neo4jService {
             queries.add(query_today);
         }
 
-        runTransaction(queries);
+        runTx(queries);       
     }
 
     public int path_count(String place, Integer num) {
 
         var params = Values.parameters("place", place, "num", num);
-        return runCypherSingle("""
-                        MATCH (p)
-                        WHERE p.name=$place
-                        CALL apoc.path.expand(p, "", "", $num, $num)
-                        YIELD path
-                        RETURN count(path) AS c;
-                        """, params).get("c", 0);
+        return runSingle(
+                """
+                MATCH (p)
+                WHERE p.name=$place
+                CALL apoc.path.expand(p, "", "", $num, $num)
+                YIELD path
+                RETURN count(path) AS c;
+                """, params).get("c", 0);
     }
 
     public int countBridges() {
 
-        return runCypherSingle("""
-                        MATCH ()-[bridge:Bridge]->()
-                        RETURN count(bridge) AS c;
-                        """, null).get("c", 0);
+        return runSingle(
+                """
+                MATCH ()-[bridge:Bridge]->()
+                RETURN count(bridge) AS c;
+                """, null).get("c", 0);
     }
 }

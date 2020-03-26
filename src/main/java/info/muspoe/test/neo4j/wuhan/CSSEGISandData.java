@@ -17,31 +17,45 @@ package info.muspoe.test.neo4j.wuhan;
 
 import info.muspoe.test.neo4j.vo.Metadata;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.logging.Logger;
+import org.neo4j.driver.Query;
+import org.neo4j.driver.Values;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class CSSEGISandData extends WuhanVirus {
+public abstract class CSSEGISandData extends WuhanVirus {
 
     public static final String URL_BASE
             = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/";
+
+    public static String[] LABELS = {"Country", "Province", "Metadata"};
 
     public static final DateTimeFormatter DAILY_REPORT_FORMATTER
             = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
     static Metadata metadata;
 
+    abstract void update_data();
+
     public void reset_graph() {
 
-        try (var session = driver.session()) {
-            session.run("""
+        reset_graph(LABELS);
+    }
+
+    public void reset_graph(String... labels) {
+        Logger.getGlobal().info("reset_graph");
+
+        var params = Values.parameters("labels", Arrays.asList(labels));
+        var query = new Query("""
                         MATCH(n)
                         UNWIND labels(n) AS label
                         WITH n, label
-                        WHERE label IN ['Country','Province','Metadata']
+                        WHERE label IN $labels
                         DETACH DELETE n;
-                        """);
-        }
+                        """, params);
+        run(query);
     }
 }

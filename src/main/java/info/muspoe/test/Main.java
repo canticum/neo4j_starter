@@ -16,8 +16,10 @@
 package info.muspoe.test;
 
 import info.muspoe.test.neo4j.SevenBridges;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,7 +30,24 @@ import java.util.stream.Stream;
  */
 public class Main {
 
-    private static final int PORT = 11006;
+    private static int port;
+    private static String user;
+    private static String password;
+
+    static {
+        try {
+            Properties pros = new Properties();
+            pros.load(SevenBridges.class.getResourceAsStream("/neo4j.properties"));
+            port = Integer.parseInt(pros.getProperty("local_port"));
+            user = pros.getProperty("local_user");
+            password = pros.getProperty("local_password");
+        } catch (IOException ex) {
+            System.out.println("******************************");
+            System.out.println(" Neo4j initialization failed. ");
+            System.out.println("******************************");
+            System.exit(0);
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -37,18 +56,18 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         var time = (args.length > 0 && args[0].trim().toUpperCase().equals("TODAY"))
-                ? SevenBridges.TODAY : SevenBridges.EULAR;
-        var port = (args.length > 1)
-                ? Integer.parseInt(args[1].trim()) : PORT;
+                ? SevenBridges.TODAY : SevenBridges.EULER;
+        port = (args.length > 1)
+                ? Integer.parseInt(args[1].trim()) : port;
 
         System.out.println("***************************");
         System.out.println(" Königsberg Bridge Problem ");
         System.out.println("***************************");
 
         System.out.println("Time = "
-                + (time == SevenBridges.EULAR ? "EULAR" : "TODAY"));
+                + (time == SevenBridges.EULER ? "EULER" : "TODAY"));
 
-        try (var sb = new SevenBridges(port, "neo4j", "123456")) {
+        try (var sb = new SevenBridges(port, user, password)) {
 
             sb.reset_graph();
             sb.create_graph(time);

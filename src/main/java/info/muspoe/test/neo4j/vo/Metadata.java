@@ -16,11 +16,9 @@
 package info.muspoe.test.neo4j.vo;
 
 import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.TIME_SERIES_FORMATTER;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;
 
@@ -35,7 +33,6 @@ public class Metadata {
     List<String> timeSeries_dates;
 
     public Metadata(Record record) {
-        Logger.getGlobal().info("Metadata");
 
         var r = record.get("n");
         this.dailyReport_uri = r.get("dailyReport_uri", "");

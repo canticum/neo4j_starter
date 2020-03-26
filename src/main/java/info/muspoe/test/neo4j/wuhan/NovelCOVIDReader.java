@@ -27,17 +27,17 @@ import org.neo4j.driver.Values;
  */
 public class NovelCOVIDReader extends WuhanVirus {
 
-    public static final String URL_NINJA
+    public static final String URL
             = "https://corona.lmao.ninja/countries";
 
-    public void list(Function<NovelCOVIDValue, Integer> keyExtractor) {
+    public void list(Function<NovelCOVIDValue, Double> keyExtractor) {
 
-        var params = Values.parameters("url", URL_NINJA);
+        var params = Values.parameters("url", URL);
         var query = """
                     WITH $url AS url
                     CALL apoc.load.json(url)
                     YIELD value RETURN value;""";
-        var result = runCypher(query, params, NovelCOVIDValue::new);
+        var result = run(query, params, NovelCOVIDValue::new);
         var width = result.stream().mapToInt(r -> r.getCountry().length()).max().getAsInt() + 4;
         System.out.printf("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
                 "Country", "Cases", "Cases/Mil", "Death", "Recovered", "TodayCases", "TodayDeaths");
@@ -47,7 +47,7 @@ public class NovelCOVIDReader extends WuhanVirus {
         result.stream()
                 .sorted(Comparator.comparing(keyExtractor, Comparator.reverseOrder()))
                 .forEach(r -> System.out.printf(
-                "%3d.%" + (width - 4) + "s %7d %9d %5d %9d %10d %11d\n",
+                "%3d.%" + (width - 4) + "s %7d %9.1f %5d %9d %10d %11d\n",
                 n.incrementAndGet(), r.getCountry(),
                 r.getCases(), r.getCasesPerOneMillion(), r.getDeaths(),
                 r.getRecovered(), r.getTodayCases(), r.getTodayDeaths()

@@ -16,7 +16,12 @@
 package info.muspoe.test.neo4j.wuhan;
 
 import info.muspoe.test.neo4j.ex.SpecifiedDateNotExistsException;
+import info.muspoe.test.neo4j.service.Neo4jService;
+import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.cypher_update_country;
+import java.util.List;
 import org.junit.jupiter.api.*;
+import org.neo4j.driver.Query;
+import org.neo4j.driver.Values;
 
 /**
  *
@@ -63,10 +68,10 @@ public class CSSEGISandData_TimeSeriesTest {
     public void testUpdate_data() throws Exception {
         System.out.println("update_data");
 
-        if (needUpdated) {
-            instance.reset_graph();
-            instance.update_data();
-        }
+//        if (needUpdated) {
+        instance.reset_graph();
+        instance.update_data();
+//        }
     }
 
     /**
@@ -78,8 +83,9 @@ public class CSSEGISandData_TimeSeriesTest {
     public void testList_by_country() throws Exception {
         System.out.println("list_by_country");
 
-        var country = "US";
+//        var country = "France";
 //        var country = "Taiwan*";
+        var country = "Australia";
         System.out.println("Country = " + country);
         instance.list_by_country(country);
     }
@@ -93,7 +99,7 @@ public class CSSEGISandData_TimeSeriesTest {
     public void testList_by_time() throws Exception {
         System.out.println("list_by_time");
 
-        var date = "3/23/20";
+        var date = "3/25/20";
         System.out.println("Date = " + date);
         try {
             instance.list_by_time(date);
