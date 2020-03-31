@@ -43,7 +43,7 @@ public class Record_DailyReport extends Location {
         this.recovered = Integer.valueOf(record.get("Recovered", "0"));
         this.latitude = Double.valueOf(record.get("Lat", "0.0"));
         this.longitude = Double.valueOf(record.get("Long_", "0.0"));
-        System.out.println("record created: " + this.getName());
+//        System.out.println("record created: " + this.getName());
     }
 
     public int getRecovered() {

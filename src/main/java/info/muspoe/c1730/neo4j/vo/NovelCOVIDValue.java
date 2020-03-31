@@ -31,25 +31,15 @@ public class NovelCOVIDValue {
     public NovelCOVIDValue(Record record) {
         var r = record.get("value");
         this.country = r.get("country").asString();
-        System.out.print(country + " 1");
         this.cases = r.get("cases").asInt();
-        System.out.print("2");
         this.todayCases = r.get("todayCases").asInt();
-        System.out.print("3");
         this.deaths = r.get("deaths").asInt();
-        System.out.print("4");
         this.todayDeaths = r.get("todayDeaths").asInt();
-        System.out.print("5");
         this.recovered = r.get("recovered").asInt();
-        System.out.print("6");
         this.active = r.get("active").asInt();
-        System.out.print("7");
         this.critical = r.get("critical").asInt();
-        System.out.print("8");
         this.casesPerOneMillion = r.get("casesPerOneMillion", 0.0);
-        System.out.print("9");
         this.deathsPerOneMillion = r.get("deathsPerOneMillion", 0.0);
-        System.out.println("0");
     }
 
     public String getCountry() {

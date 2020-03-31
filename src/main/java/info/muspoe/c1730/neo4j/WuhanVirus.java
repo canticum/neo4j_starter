@@ -20,8 +20,6 @@ import info.muspoe.c1730.neo4j.vo.NovelCOVIDValue;
 import info.muspoe.c1730.neo4j.wuhan.CSSEGISandData_TimeSeries;
 import info.muspoe.c1730.neo4j.wuhan.NovelCOVIDReader;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,17 +39,31 @@ public class WuhanVirus extends Neo4jService {
     public WuhanVirus() {
     }
 
+    @GetMapping("/wv")
+    public String hello() {
+
+        return """
+               <pre>
+               /wv/nc - novelCOVID dataset
+                 parameters: sortedby=[todayCases*,casesPerOneMillion,cases,deaths,todayDeaths,country]
+               /wv/cssetime - CSSEGISandData
+                 parameters: type=[country*,update,date]
+                             date=[latest*,{MM/dd/yy}] or country=[Taiwan**,...]
+               </pre>
+               """;
+    }
+
     @GetMapping("/wv/nc")
     public String novelCOVID(
-            @RequestParam(value = "sortby", defaultValue = "todayCases") String sortby) {
+            @RequestParam(value = "sortedby", defaultValue = "todayCases") String sortedby) {
 
         nc = (nc == null) ? new NovelCOVIDReader() : nc;
 
-        String subtitle = sortby;
-        String result = switch (sortby.toLowerCase()) {
+        String subtitle = sortedby;
+        String result = switch (sortedby.toLowerCase()) {
             case "casespom","casesperonemillion":
                 subtitle = "casesPerOneMillion";
-                yield nc.listDouble(NovelCOVIDValue::getCasesPerOneMillion);
+                yield nc.list(NovelCOVIDValue::getCasesPerOneMillion);
             case "cases":
                 subtitle = "cases";
                 yield nc.list(NovelCOVIDValue::getCases);
@@ -61,6 +73,9 @@ public class WuhanVirus extends Neo4jService {
             case "todaydeaths":
                 subtitle = "todayDeaths";
                 yield nc.list(NovelCOVIDValue::getTodayDeaths);
+            case "country":
+                subtitle = "country";
+                yield nc.listNaturalOrder(NovelCOVIDValue::getCountry);
             case "todaycases":
             default:
                 subtitle = "todayCases";

@@ -31,12 +31,17 @@ public class NovelCOVIDReader extends WuhanVirus {
     public static final String URL
             = "https://corona.lmao.ninja/countries";
 
-    public String list(Function<NovelCOVIDValue, Integer> keyExtractor) {
+    public String listNaturalOrder(Function<NovelCOVIDValue, Comparable> keyExtractor) {
 
-        return listDouble(value -> keyExtractor.apply(value).doubleValue());
+        return list(Comparator.comparing(keyExtractor));
     }
-    
-    public String listDouble(Function<NovelCOVIDValue, Double> keyExtractor) {
+
+    public String list(Function<NovelCOVIDValue, Comparable> keyExtractor) {
+
+        return list(Comparator.comparing(keyExtractor, Comparator.reverseOrder()));
+    }
+
+    public String list(Comparator<NovelCOVIDValue> comparator) {
 
         var params = Values.parameters("url", URL);
         var query = """
@@ -53,7 +58,7 @@ public class NovelCOVIDReader extends WuhanVirus {
                         "-------", "-----", "---------", "-----", "---------", "----------", "-----------"));
         var n = new AtomicInteger(0);
         result.stream()
-                .sorted(Comparator.comparing(keyExtractor, Comparator.reverseOrder()))
+                .sorted(comparator)
                 .forEach(r -> output.append(
                 String.format("%3d.%" + (width - 4) + "s %7d %9.1f %5d %9d %10d %11d\n",
                         n.incrementAndGet(), r.getCountry(),
