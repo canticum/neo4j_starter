@@ -13,39 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.vo;
+package info.muspoe.c1730.neo4j.ex;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class Location {
+public class SpecifiedCountryNotExistsException extends RuntimeException {
 
-    protected String province, country;
-    protected double latitude, longitude;
-
-    public String getProvince() {
-        
-        return province;
+    /**
+     * Creates a new instance of <code>SpecifiedCountryNotExistsException</code>
+     * without detail message.
+     */
+    public SpecifiedCountryNotExistsException() {
     }
 
-    public String getCountry() {
-        
-        return country;
-    }
-
-    public double getLatitude() {
-        
-        return latitude;
-    }
-
-    public double getLongitude() {
-     
-        return longitude;
-    }
-
-    public String getName() {
-
-        return (this.province != null ? this.province + ", " : "") + this.country;
+    /**
+     * Constructs an instance of <code>SpecifiedCountryNotExistsException</code>
+     * with the specified detail message.
+     *
+     * @param msg the detail message.
+     */
+    public SpecifiedCountryNotExistsException(String msg) {
+        super(msg);
     }
 }

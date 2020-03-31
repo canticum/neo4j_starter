@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.vo;
+package info.muspoe.c1730.neo4j.vo;
 
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
+import static info.muspoe.c1730.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;

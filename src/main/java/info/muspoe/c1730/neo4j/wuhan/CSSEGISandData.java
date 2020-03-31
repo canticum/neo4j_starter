@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
+package info.muspoe.c1730.neo4j.wuhan;
 
-import info.muspoe.test.neo4j.vo.Metadata;
+import info.muspoe.c1730.neo4j.WuhanVirus;
+import info.muspoe.c1730.neo4j.vo.Metadata;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ public abstract class CSSEGISandData extends WuhanVirus {
     public static final DateTimeFormatter DAILY_REPORT_FORMATTER
             = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
-    static Metadata metadata;
+    protected static Metadata metadata;
 
     abstract void update_data();
 
@@ -57,5 +58,10 @@ public abstract class CSSEGISandData extends WuhanVirus {
                         DETACH DELETE n;
                         """, params);
         run(query);
+    }
+
+    public static Metadata getMetadata() {
+
+        return metadata;
     }
 }

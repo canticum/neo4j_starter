@@ -13,28 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
-
-import info.muspoe.test.neo4j.service.Neo4jService;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+package info.muspoe.c1730.neo4j.vo;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class WuhanVirus extends Neo4jService {
+public class Location {
 
-    public static boolean test(String url) throws Exception {
+    protected String province, country;
+    protected double latitude, longitude;
 
-        Logger.getGlobal().log(Level.INFO, "Testing data from {0}", url);
-        try {
-            new URL(url).openStream().close();
-        } catch (FileNotFoundException ex) {
-            return false;
-        }
-        return true;
+    public String getProvince() {
+        
+        return province;
+    }
+
+    public String getCountry() {
+        
+        return country;
+    }
+
+    public double getLatitude() {
+        
+        return latitude;
+    }
+
+    public double getLongitude() {
+     
+        return longitude;
+    }
+
+    public String getName() {
+
+        return (this.province != null ? this.province + ", " : "") + this.country;
     }
 }

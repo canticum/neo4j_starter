@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
+package info.muspoe.c1730.neo4j.wuhan;
 
-import info.muspoe.test.neo4j.vo.NovelCOVIDValue;
+import info.muspoe.c1730.neo4j.WuhanVirus;
+import info.muspoe.c1730.neo4j.vo.NovelCOVIDValue;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -30,7 +31,12 @@ public class NovelCOVIDReader extends WuhanVirus {
     public static final String URL
             = "https://corona.lmao.ninja/countries";
 
-    public void list(Function<NovelCOVIDValue, Double> keyExtractor) {
+    public String list(Function<NovelCOVIDValue, Integer> keyExtractor) {
+
+        return listDouble(value -> keyExtractor.apply(value).doubleValue());
+    }
+    
+    public String listDouble(Function<NovelCOVIDValue, Double> keyExtractor) {
 
         var params = Values.parameters("url", URL);
         var query = """
@@ -39,18 +45,21 @@ public class NovelCOVIDReader extends WuhanVirus {
                     YIELD value RETURN value;""";
         var result = run(query, params, NovelCOVIDValue::new);
         var width = result.stream().mapToInt(r -> r.getCountry().length()).max().getAsInt() + 4;
-        System.out.printf("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
-                "Country", "Cases", "Cases/Mil", "Death", "Recovered", "TodayCases", "TodayDeaths");
-        System.out.printf("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
-                "-------", "-----", "---------", "-----", "---------", "----------", "-----------");
+        var output = new StringBuilder(
+                String.format("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
+                        "Country", "Cases", "Cases/Mil", "Death", "Recovered", "TodayCases", "TodayDeaths"));
+        output.append(
+                String.format("%" + width + "s %7s %9s %5s %9s %10s %11s\n",
+                        "-------", "-----", "---------", "-----", "---------", "----------", "-----------"));
         var n = new AtomicInteger(0);
         result.stream()
                 .sorted(Comparator.comparing(keyExtractor, Comparator.reverseOrder()))
-                .forEach(r -> System.out.printf(
-                "%3d.%" + (width - 4) + "s %7d %9.1f %5d %9d %10d %11d\n",
-                n.incrementAndGet(), r.getCountry(),
-                r.getCases(), r.getCasesPerOneMillion(), r.getDeaths(),
-                r.getRecovered(), r.getTodayCases(), r.getTodayDeaths()
-        ));
+                .forEach(r -> output.append(
+                String.format("%3d.%" + (width - 4) + "s %7d %9.1f %5d %9d %10d %11d\n",
+                        n.incrementAndGet(), r.getCountry(),
+                        r.getCases(), r.getCasesPerOneMillion(), r.getDeaths(),
+                        r.getRecovered(), r.getTodayCases(), r.getTodayDeaths()
+                )));
+        return output.toString();
     }
 }

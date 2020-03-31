@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
+package info.muspoe.c1730.neo4j.wuhan;
 
-import info.muspoe.test.neo4j.ex.SpecifiedCountryNotExistsException;
+import info.muspoe.c1730.neo4j.ex.SpecifiedCountryNotExistsException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -28,8 +28,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.Values;
-import info.muspoe.test.neo4j.ex.SpecifiedDateNotExistsException;
-import info.muspoe.test.neo4j.vo.*;
+import info.muspoe.c1730.neo4j.ex.SpecifiedDateNotExistsException;
+import info.muspoe.c1730.neo4j.vo.Metadata;
+import info.muspoe.c1730.neo4j.vo.Record_TimeSeries;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -208,16 +209,6 @@ public class CSSEGISandData_TimeSeries extends CSSEGISandData {
 
         //將加總後的國家數據寫入
         System.out.println("--------------------UPDATING COUNTRIES FROM THEIR PROVINCES...");
-//        for (var entry : countries_with_data.entrySet()) {
-//            var country = entry.getKey();
-//            var confirmed = entry.getValue().get("confirmed");
-//            var deaths = entry.getValue().get("deaths");
-//            var params = Values.parameters(
-//                    "country", country, "confirmed", confirmed, "deaths", deaths);
-//            System.out.println(params);
-//            var result = run(cypher_update_country, params, this::recordEntry);
-//            System.out.println(result);
-//        }
         countries_with_data.entrySet().stream()
                 .map(entry
                         -> Values.parameters(
@@ -260,7 +251,7 @@ public class CSSEGISandData_TimeSeries extends CSSEGISandData {
         list.forEach(System.out::println);
     }
 
-    public void list_by_country(String country) {
+    public String list_by_country(String country) {
 
         var params = Values.parameters("country", country);
         var result = run(
@@ -270,18 +261,21 @@ public class CSSEGISandData_TimeSeries extends CSSEGISandData {
         if (result.isEmpty()) {
             throw new SpecifiedCountryNotExistsException(country);
         }
-//        System.out.println("Specified country: " + country);
-        System.out.printf("%10s%12s%12s\n", "Date", "Confirmed", "Deaths");
-        System.out.printf("%10s%12s%12s\n", "----", "---------", "------");
+//        System.out.println();
+        var output = new StringBuilder(
+                String.format("%10s%12s%12s\n%10s%12s%12s\n",
+                        "Date", "Confirmed", "Deaths",
+                        "----", "---------", "------"));
         IntStream.range(0, dates.size())
-                .mapToObj(i -> String.format("%10s%12d%12d",
+                .mapToObj(i -> String.format("%10s%12d%12d\n",
                 dates.get(i),
                 result.get(0).get("confirmed").asList(Value::asInt).get(i),
                 result.get(0).get("deaths").asList(Value::asInt).get(i)))
-                .forEach(System.out::println);
+                .forEach(output::append);
+        return output.toString();
     }
 
-    public void list_by_time(String date) throws Exception {
+    public String list_by_time(String date) throws Exception {
 
         var index = dates.stream()
                 .map(label -> LocalDate.parse(label, TIME_SERIES_FORMATTER))
@@ -301,14 +295,18 @@ public class CSSEGISandData_TimeSeries extends CSSEGISandData {
         );
 
         var width = result.stream().mapToInt(r -> r.getKey().length()).max().getAsInt() + 4;
-        System.out.println("Specified Date: " + date);
-        System.out.printf("%" + width + "s%12s%12s\n", "Country", "Confirmed", "Deaths");
-        System.out.printf("%" + width + "s%12s%12s\n", "-------", "---------", "------");
+        var output = new StringBuilder(
+                String.format("%" + width + "s%12s%12s\n" + "%" + width + "s%12s%12s\n",
+                        "Country", "Confirmed", "Deaths",
+                        "-------", "---------", "------"));
         var n = new AtomicInteger(0);
         result.stream()
                 .sorted(Comparator.comparing(entry -> entry.getValue().get(0), Comparator.reverseOrder()))
-                .forEach(e -> System.out.printf("%3d.%" + (width - 4) + "s%12s%12s\n",
-                n.incrementAndGet(), e.getKey(), e.getValue().get(0), e.getValue().get(1)));
+                .forEach(e -> output.append(
+                String.format("%3d.%" + (width - 4) + "s%12s%12s\n",
+                        n.incrementAndGet(),
+                        e.getKey(), e.getValue().get(0), e.getValue().get(1))));
+        return output.toString();
     }
 
     static final String cypher_metadata

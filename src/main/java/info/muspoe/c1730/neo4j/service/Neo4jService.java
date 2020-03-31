@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.service;
+package info.muspoe.c1730.neo4j.service;
 
-import info.muspoe.test.neo4j.SevenBridges;
+import info.muspoe.c1730.neo4j.SevenBridges;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
@@ -121,7 +125,18 @@ public class Neo4jService implements AutoCloseable {
                 WITH label, n
                 WHERE label IN $labels                
                 DETACH DELETE n;""", params);
-        Neo4jService.this.run(query);
+        this.run(query);
+    }
+
+    public static boolean test(String url) throws Exception {
+
+        Logger.getGlobal().log(Level.INFO, "Testing data from {0}", url);
+        try {
+            new URL(url).openStream().close();
+        } catch (FileNotFoundException ex) {
+            return false;
+        }
+        return true;
     }
 
     @Override

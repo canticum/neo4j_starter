@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.wuhan;
+package info.muspoe.c1730.neo4j.wuhan;
 
-import info.muspoe.test.neo4j.vo.DeathRate;
-import info.muspoe.test.neo4j.vo.Metadata;
-import info.muspoe.test.neo4j.vo.Record_DailyReport;
+import info.muspoe.c1730.neo4j.WuhanVirus;
+import info.muspoe.c1730.neo4j.vo.DeathRate;
+import info.muspoe.c1730.neo4j.vo.Metadata;
+import info.muspoe.c1730.neo4j.vo.Record_DailyReport;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

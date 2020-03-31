@@ -15,7 +15,8 @@
  */
 package info.muspoe.test.neo4j.wuhan;
 
-import static info.muspoe.test.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
+import info.muspoe.c1730.neo4j.wuhan.CSSEGISandData_DailyReport;
+import static info.muspoe.c1730.neo4j.wuhan.CSSEGISandData_TimeSeries.DAILY_REPORT_FORMATTER;
 import org.junit.jupiter.api.*;
 
 /**

@@ -13,28 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.ex;
+package info.muspoe.c1730;
+
+import info.muspoe.c1730.neo4j.SevenBridges;
+import info.muspoe.c1730.neo4j.WuhanVirus;
+import org.springframework.boot.SpringApplication;
 
 /**
  *
  * @author Jonathan Chang, Chun-yien <ccy@musicapoetica.org>
  */
-public class SpecifiedCountryNotExistsException extends RuntimeException {
+public class Main {
 
-    /**
-     * Creates a new instance of <code>SpecifiedCountryNotExistsException</code>
-     * without detail message.
-     */
-    public SpecifiedCountryNotExistsException() {
-    }
+    public static void main(String[] args) {
 
-    /**
-     * Constructs an instance of <code>SpecifiedCountryNotExistsException</code>
-     * with the specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public SpecifiedCountryNotExistsException(String msg) {
-        super(msg);
+        SpringApplication.run(new Class[]{
+            SevenBridges.class,
+            WuhanVirus.class
+        }, args);
     }
 }

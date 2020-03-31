@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.test.neo4j.ex;
+package info.muspoe.c1730.neo4j.ex;
 
 /**
  *
