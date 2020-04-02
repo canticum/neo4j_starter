@@ -15,7 +15,6 @@
  */
 package info.muspoe.c1730.neo4j.service;
 
-import info.muspoe.c1730.neo4j.SevenBridges;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -44,7 +43,7 @@ public class Neo4jService implements AutoCloseable {
 
         try {
             Properties pros = new Properties();
-            pros.load(SevenBridges.class.getResourceAsStream("/neo4j.properties"));
+            pros.load(Neo4jService.class.getResourceAsStream("/neo4j.properties"));
             var uri = pros.getProperty("uri");
             var user = pros.getProperty("user");
             var password = pros.getProperty("password");
