@@ -16,7 +16,6 @@
 package info.muspoe.c1730;
 
 import info.muspoe.c1730.neo4j.SevenBridges;
-import info.muspoe.c1730.neo4j.WuhanVirus;
 import org.springframework.boot.SpringApplication;
 
 /**
@@ -27,9 +26,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(new Class[]{
-            SevenBridges.class,
-            WuhanVirus.class
-        }, args);
+        SpringApplication.run(SevenBridges.class, args);
     }
 }

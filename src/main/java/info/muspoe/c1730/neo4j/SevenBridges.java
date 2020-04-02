@@ -73,16 +73,39 @@ public class SevenBridges extends Neo4jService {
         super(uri, user, password);
     }
 
-    @GetMapping("/sb")
-    public String hello(
-            @RequestParam(value = "time", defaultValue = "euler") String t) {
+    @GetMapping("/")
+    public String hello() {
 
-        var time = switch (t.trim().toLowerCase()) {
-            case "today" ->
-                SevenBridges.TODAY;
-            default ->
-                SevenBridges.EULER;
-        };
+        return """
+               <pre>
+               ***************************
+                Königsberg Bridge Problem
+               ***************************
+               
+               /euler
+               Bridges at Euler's time.
+               
+               /today
+               Bridges today.
+               </pre>
+               """;
+    }
+
+    @GetMapping("/today")
+    public String today() {
+
+        var time = SevenBridges.TODAY;
+        return sb(time);
+    }
+
+    @GetMapping("/euler")
+    public String euler() {
+
+        var time = SevenBridges.EULER;
+        return sb(time);
+    }
+
+    private String sb(Integer time) {
 
         StringBuilder result = new StringBuilder(header + "Time = "
                 + (time == SevenBridges.EULER ? "EULER" : "TODAY")
