@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.c1730;
+package tech.metacontext;
 
-import info.muspoe.c1730.neo4j.SevenBridges;
+import tech.metacontext.neo4j.SevenBridges;
 import org.springframework.boot.SpringApplication;
 
 /**

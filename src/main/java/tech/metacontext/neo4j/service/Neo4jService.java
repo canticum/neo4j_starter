@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.c1730.neo4j.service;
+package tech.metacontext.neo4j.service;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

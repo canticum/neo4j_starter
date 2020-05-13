@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package info.muspoe.c1730.neo4j;
+package tech.metacontext.neo4j;
 
-import info.muspoe.c1730.neo4j.service.Neo4jService;
+import tech.metacontext.neo4j.service.Neo4jService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
